@@ -13,18 +13,15 @@ app.get('/', (req, res) => {
 
 app.post('/register', (req, res) => {
   const { name, email, password, sub } = req.body
-  db.query(
-    'insert into users values (name, email, password, sub) values (?,?,?,?)',
-    [name, email, password, sub],
-    (error, results, fields) => {
-      if (error) {
-        console.error('Error al crear un nuevo usuario: ', error)
-        res.sendStatus(500)
-      } else {
-        res.json({ id: results.insertId })
-      }
+  db.query('insert into users (name, email, password, sub) values (?, ?, ?, ?)', [name, email, password, sub], (error, results) => {
+    if (error) {
+      console.error('Error al crear un nuevo usuario: ', error)
+      res.status(500).json('Email ya existente')
+    } else {
+      const newUser = { id: results.insertId, name, email, password, sub }
+      res.status(200).json(newUser)
     }
-  )
+  })
 })
 
 app.listen(port, () => {
