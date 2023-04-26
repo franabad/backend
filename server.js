@@ -7,12 +7,15 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 const cors = require('cors')
+const cookie = require('cookie')
+const cookieParser = require('cookie-parser')
 
 dotenv.config()
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(cors())
+app.use(cookieParser())
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -47,7 +50,14 @@ app.post('/login', (req, res) => {
       bcrypt.compare(password, user.password)
         .then(result => {
           if (result) {
-            const token = jwt.sign({ id: user.id, name: user.name, email: user.email, sub: user.sub }, process.env.JWT_SECRET, { expiresIn: '1m' })
+            const token = jwt.sign({ id: user.id, name: user.name, email: user.email, sub: user.sub }, process.env.JWT_SECRET)
+            res.setHeader('Set-Cookie', cookie.serialize('token', token, {
+              httpOnly: true,
+              // path: '/',
+              // domain: 'localhost',
+              // port: 3000,
+              maxAge: 60 * 60 * 24 * 7
+            }))
             res.status(200).json({ token })
           } else {
             res.status(404).json('Usuario o contraseña incorrectos')
