@@ -6,26 +6,28 @@ const db = require('./db/db.js')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
+const cors = require('cors')
 
 dotenv.config()
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(cors())
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
 app.post('/register', (req, res) => {
-  const { name, email, password, sub } = req.body
+  const { email, password } = req.body
   bcrypt.hash(password, 10)
     .then(hashedPassword => {
-      db.query('insert into users (name, email, password, sub) values (?, ?, ?, ?)', [name, email, hashedPassword, sub], (error, results) => {
+      db.query('insert into users (email, password) values (?, ?)', [email, hashedPassword], (error, results) => {
         if (error) {
           console.error('Error al crear un nuevo usuario: ', error)
           res.status(500).json('El email proporcionado ya existe')
         } else {
-          const newUser = { id: results.insertId, name, email, hashedPassword, sub }
+          const newUser = { id: results.insertId, email, hashedPassword }
           res.status(200).json(newUser)
         }
       })
