@@ -14,9 +14,3 @@ db.connect((err) => {
   }
   console.log('Connected to database!')
 })
-
-db.query('show tables from padelvlc', (err, rows) => {
-  if (err) throw err
-  console.log(rows)
-  db.end()
-})
