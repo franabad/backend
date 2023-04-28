@@ -1,0 +1,3 @@
+name = "sports"
+main = "server.js"
+compatibility_date = "2023-01-07"
