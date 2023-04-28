@@ -1,3 +1,4 @@
+// import { useState } from 'react'
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
@@ -7,14 +8,13 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 const cors = require('cors')
-const cookie = require('cookie')
 const cookieParser = require('cookie-parser')
 
 dotenv.config()
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.use(cors())
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
 app.use(cookieParser())
 
 app.get('/', (req, res) => {
@@ -50,21 +50,31 @@ app.post('/login', (req, res) => {
       bcrypt.compare(password, user.password)
         .then(result => {
           if (result) {
-            const token = jwt.sign({ id: user.id, name: user.name, email: user.email, sub: user.sub }, process.env.JWT_SECRET)
-            res.setHeader('Set-Cookie', cookie.serialize('token', token, {
-              httpOnly: true,
-              // path: '/',
-              // domain: 'localhost',
-              // port: 3000,
-              maxAge: 60 * 60 * 24 * 7
-            }))
-            res.status(200).json({ token })
+            const sessionID = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET)
+            res.cookie('sessionID', sessionID, { maxAge: 120000, httpOnly: true })
+            res.status(200).json({ id: user.id, email: user.email, sessionID })
           } else {
             res.status(404).json('Usuario o contraseña incorrectos')
           }
         })
     }
   })
+})
+
+app.get('/login', (req, res) => {
+  const sessionID = req.cookies.sessionID
+  if (!sessionID) {
+    return res.status(401).json('No hay sesión iniciada')
+  }
+
+  try {
+    const decodedToken = jwt.verify(sessionID, process.env.JWT_SECRET)
+    const { email } = decodedToken
+    // aquí puede realizar cualquier verificación adicional que desee hacer antes de permitir que el usuario acceda a la página de inicio de sesión
+    res.status(200).json(`Bienvenido ${email}!`)
+  } catch (error) {
+    res.status(401).json('Sesión no válida')
+  }
 })
 
 app.listen(port, () => {
