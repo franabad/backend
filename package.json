@@ -20,6 +20,7 @@
     "express-jwt": "^8.4.1",
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^3.2.4",
+    "nodemon": "^2.0.22",
     "wrangler": "^2.17.0"
   },
   "devDependencies": {
