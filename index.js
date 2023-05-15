@@ -25,7 +25,7 @@ app.post('/register', (req, res) => {
   const { email, password } = req.body
   bcrypt.hash(password, 10)
     .then(hashedPassword => {
-      db.query('insert into users (email, password) values (?, ?)', [email, hashedPassword], (error, results) => {
+      db.query('insert into users (email, pass) values (?, ?)', [email, hashedPassword], (error, results) => {
         if (error) {
           console.error('Error al crear un nuevo usuario: ', error)
           res.status(500).json('El email proporcionado ya existe')
@@ -47,7 +47,7 @@ app.post('/login', (req, res) => {
       res.status(404).json('Usuario o contraseña incorrectos')
     } else {
       const user = results[0]
-      bcrypt.compare(password, user.password)
+      bcrypt.compare(password, user.pass)
         .then(result => {
           if (result) {
             const sessionID = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET)
