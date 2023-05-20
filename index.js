@@ -2,7 +2,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
-const port = 3002
+const port = 3001
 const db = require('./db/db.js')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -14,7 +14,7 @@ dotenv.config()
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.use(cors({ credentials: true, origin: process.env.IP_PUBLIC }))
+app.use(cors({ credentials: true, origin: process.env.url_dev }))
 app.use(cookieParser())
 
 app.get('/', (req, res) => {
