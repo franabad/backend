@@ -22,10 +22,12 @@ app.get('/', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
+  const now = new Date()
   const { email, name, lastname, password } = req.body
+  req.body.create_date = now
   bcrypt.hash(password, 10)
     .then(hashedPassword => {
-      db.query('insert into users (email, pass, name, lastname) values (?, ?, ?, ?)', [email, hashedPassword, name, lastname], (error, results) => {
+      db.query('insert into users (email, pass, name, lastname, create_date) values (?, ?, ?, ?, now())', [email, hashedPassword, name, lastname], (error, results) => {
         if (error) {
           console.error('Error al crear un nuevo usuario: ', error)
           res.status(500).json('El email proporcionado ya existe')
