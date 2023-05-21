@@ -54,7 +54,7 @@ app.post('/login', (req, res) => {
           if (result) {
             const sessionID = jwt.sign({ id: user.id, email: user.email, name: user.name }, process.env.JWT_SECRET)
             res.cookie('sessionID', sessionID, { maxAge: 120000, httpOnly: true })
-            res.status(200).json({ id: user.id, email: user.email, sessionID })
+            res.status(200).json({ id: user.id, email: user.email, message: 'Sesión iniciada' })
           } else {
             res.status(500).json(null)
           }
