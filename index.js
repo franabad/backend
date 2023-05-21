@@ -41,14 +41,18 @@ app.post('/register', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body
+  console.log('email:', email, 'password:', password)
   db.query('select * from users where email = ?', [email], (error, results) => {
+    console.log('results:', results)
     if (error) {
-      console.error('Error al loguearse: ', error)
+      console.log('Error al loguearse: ', error)
       res.status(500).json('Error en el servidor')
     } else if (results.length === 0) {
-      res.status(404).json('Usuario o contraseña incorrectos')
+      console.log('Usuario o contraseña incorrectos')
+      res.status(401).json(null)
     } else {
       const user = results[0]
+      console.log('user:', user)
       bcrypt.compare(password, user.pass)
         .then(result => {
           if (result) {
@@ -58,6 +62,10 @@ app.post('/login', (req, res) => {
           } else {
             res.status(500).json(null)
           }
+        })
+        .catch(error => {
+          console.log('Error al comparar contraseñas: ', error)
+          res.status(500).json('Error en el servidor')
         })
     }
   })
