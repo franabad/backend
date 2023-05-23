@@ -29,8 +29,8 @@ app.post('/register', (req, res) => {
     .then(hashedPassword => {
       db.query('insert into users (email, pass, name, lastname, create_date) values (?, ?, ?, ?, now())', [email, hashedPassword, name, lastname], (error, results) => {
         if (error) {
-          console.error('Error al crear un nuevo usuario: ', error)
-          res.status(500).json('El email proporcionado ya existe')
+          console.error('El email ya existe: ', error)
+          res.status(502).json(null)
         } else {
           const newUser = { id: results.insertId, email, hashedPassword, name, lastname }
           res.status(200).json(newUser)
@@ -39,20 +39,32 @@ app.post('/register', (req, res) => {
     })
 })
 
+app.post('/profile', (req, res) => {
+  const { email } = req.body
+  console.log('email: ', email)
+  db.query('select * from users where email = ?', [email], (error, results) => {
+    if (error) {
+      console.error('Error a la hora de fetchear el perfil ', error)
+      res.status(502).json(null)
+    } else {
+      const newUser = { id: results.insertId, email }
+      res.status(200).json(newUser)
+    }
+  })
+})
+
 app.post('/login', (req, res) => {
   const { email, password } = req.body
-  console.log('email:', email, 'password:', password)
   db.query('select * from users where email = ?', [email], (error, results) => {
     console.log('results:', results)
     if (error) {
       console.log('Error al loguearse: ', error)
-      res.status(500).json('Error en el servidor')
+      res.status(500).json(null)
     } else if (results.length === 0) {
       console.log('Usuario o contraseña incorrectos')
       res.status(401).json(null)
     } else {
       const user = results[0]
-      console.log('user:', user)
       bcrypt.compare(password, user.pass)
         .then(result => {
           if (result) {
@@ -71,20 +83,8 @@ app.post('/login', (req, res) => {
   })
 })
 
-app.get('/login', (req, res) => {
-  const sessionID = req.cookies.sessionID
-  if (!sessionID) {
-    return res.status(401).json('No hay sesión iniciada')
-  }
+app.post('/profile', (req, res) => {
 
-  try {
-    const decodedToken = jwt.verify(sessionID, process.env.JWT_SECRET)
-    const { name } = decodedToken
-    // aquí puede realizar cualquier verificación adicional que desee hacer antes de permitir que el usuario acceda a la página de inicio de sesión
-    res.status(200).json(`Bienvenido, ${name}!`)
-  } catch (error) {
-    res.status(401).json('Sesión no válida')
-  }
 })
 
 app.listen(port, () => {
