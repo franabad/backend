@@ -24,10 +24,12 @@ app.get('/', (req, res) => {
 app.post('/register', (req, res) => {
   const now = new Date()
   const { email, name, lastname, password } = req.body
+  const nameCapitalized = name.charAt(0).toUpperCase() + name.slice(1)
+  const lastnameCapitalized = lastname.charAt(0).toUpperCase() + lastname.slice(1)
   req.body.create_date = now
   bcrypt.hash(password, 10)
     .then(hashedPassword => {
-      db.query('insert into users (email, pass, name, lastname, create_date) values (?, ?, ?, ?, now())', [email, hashedPassword, name, lastname], (error, results) => {
+      db.query('insert into users (email, pass, name, lastname, create_date) values (?, ?, ?, ?, now())', [email, hashedPassword, nameCapitalized, lastnameCapitalized], (error, results) => {
         if (error) {
           console.error('El email ya existe: ', error)
           res.status(502).json(null)
@@ -41,14 +43,14 @@ app.post('/register', (req, res) => {
 
 app.post('/profile', (req, res) => {
   const { email } = req.body
-  console.log('email: ', email)
   db.query('select * from users where email = ?', [email], (error, results) => {
     if (error) {
       console.error('Error a la hora de fetchear el perfil ', error)
       res.status(502).json(null)
     } else {
-      const newUser = { id: results.insertId, email }
-      res.status(200).json(newUser)
+      console.log('El perfil fetcheado', results)
+      const user = results[0]
+      res.status(200).json({ email: user.email, name: user.name, lastname: user.lastname, password: user.pass })
     }
   })
 })
@@ -56,7 +58,7 @@ app.post('/profile', (req, res) => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body
   db.query('select * from users where email = ?', [email], (error, results) => {
-    console.log('results:', results)
+    console.log('results del login:', results)
     if (error) {
       console.log('Error al loguearse: ', error)
       res.status(500).json(null)
