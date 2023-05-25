@@ -15,6 +15,13 @@ db.query('create table if not exists users (id int primary key auto_increment, n
   results && console.log('Table created successfully!')
 })
 
+db.query('create table if not exists matches (id varchar(10) primary key, p1 varchar(50), p2 varchar(50), p3 varchar(50), p4 varchar(50))', (error, results) => {
+  if (error) {
+    console.error('Error creating table: ', error)
+  }
+  results && console.log('Table created successfully!')
+})
+
 db.connect((err) => {
   if (err) {
     console.error('Error connecting to database: ', err)

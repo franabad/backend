@@ -1,4 +1,3 @@
-// import { useState } from 'react'
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
@@ -19,6 +18,29 @@ app.use(cookieParser())
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
+})
+
+app.get('/:id', (req, res) => {
+  const { id } = req.params
+  db.query('select * from matches where id = ?', [id], (error, results) => {
+    if (error) {
+      console.error('Error fetching match: ', error)
+      res.status(502).json(null)
+    } else if (results.length === 0) {
+      db.query('insert into matches (id) values (?)', [id], (error, resultsInsert) => {
+        if (error) {
+          console.error('Error creating match: ', error)
+          res.status(502).json(null)
+        } else {
+          const newMatch = { id: resultsInsert.id, p1: resultsInsert.p1, p2: resultsInsert.p2, p3: resultsInsert.p3, p4: resultsInsert.p4, message: 'Partido creado correctamente' }
+          res.status(200).json(newMatch)
+        }
+      })
+    } else {
+      const matchData = results[0]
+      res.status(200).json({ id: matchData.id, p1: matchData.p1, p2: matchData.p2, p3: matchData.p3, p4: matchData.p4, message: 'Partido ya existente' })
+    }
+  })
 })
 
 app.post('/register', (req, res) => {
