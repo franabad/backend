@@ -14,7 +14,7 @@ dotenv.config()
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.use(cors({ credentials: true, origin: process.env.url_dev }))
+app.use(cors({ credentials: true, origin: process.env.IP_DEV }))
 app.use(cookieParser())
 
 app.get('/', (req, res) => {
